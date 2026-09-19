@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvestPro | Seu Painel Financeiro</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons CDN -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Estilos customizados -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex h-screen overflow-hidden antialiased">
+
+    <!-- Sidebar Desktop -->
+    <aside class="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col shadow-sm z-10">
+        <div class="h-20 flex items-center px-6 border-b border-slate-100">
+            <i class="ph-fill ph-trend-up text-3xl text-indigo-600 mr-2"></i>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Invest<span class="text-indigo-600">Pro</span></h1>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <button onclick="switchTab('mercado')" id="btn-tab-mercado" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl bg-indigo-50 text-indigo-700 transition-colors">
+                <i class="ph ph-squares-four text-xl"></i> Visão Geral
+            </button>
+            <button onclick="switchTab('carteira')" id="btn-tab-carteira" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-slate-50 transition-colors">
+                <i class="ph ph-wallet text-xl"></i> Minha Carteira
+            </button>
+            <button onclick="switchTab('api')" id="btn-tab-api" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-slate-50 transition-colors relative">
+                <i class="ph ph-globe-hemisphere-west text-xl"></i> Câmbio (API)
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+            </button>
+        </nav>
+        <div class="p-4 border-t border-slate-100">
+            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
+                <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md">EU</div>
+                <div class="text-sm">
+                    <p class="font-bold text-slate-900">Investidor</p>
+                    <p class="text-slate-500 text-xs">Projeto Acadêmico</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <!-- Header Mobile -->
+        <header class="md:hidden bg-white h-16 border-b border-slate-200 flex items-center justify-between px-4 shadow-sm z-10">
+            <div class="flex items-center gap-2">
+                <i class="ph-fill ph-trend-up text-2xl text-indigo-600"></i>
+                <h1 class="text-xl font-bold text-slate-900">InvestPro</h1>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="switchTab('mercado')" class="p-2 text-slate-600"><i class="ph ph-squares-four text-2xl"></i></button>
+                <button onclick="switchTab('carteira')" class="p-2 text-slate-600"><i class="ph ph-wallet text-2xl"></i></button>
+                <button onclick="switchTab('api')" class="p-2 text-slate-600"><i class="ph ph-globe text-2xl"></i></button>
+            </div>
+        </header>
+
+        <!-- Container de Rolagem Central -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            
+            <!-- ABA MERCADO -->
+            <section id="aba-mercado" class="block space-y-6 max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">Ações e FIIs (B3)</h2>
+                        <p class="text-slate-500 text-sm mt-1">Simulador de ativos com base no mercado brasileiro.</p>
+                    </div>
+                    
+                    <div class="relative w-full md:w-72">
+                        <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input type="text" id="search-input" placeholder="Buscar ativo por código ou nome..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- Filtros Pills -->
+                <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    <button onclick="filterAssets('Todos')" class="filter-btn bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap shadow-md">Todos os Ativos</button>
+                    <button onclick="filterAssets('Ação Bancária')" class="filter-btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap">Ações Bancárias</button>
+                    <button onclick="filterAssets('Energia')" class="filter-btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap">Energia Elétrica</button>
+                    <button onclick="filterAssets('FII - Tijolo')" class="filter-btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap">FIIs (Tijolo)</button>
+                    <button onclick="filterAssets('FII - Papel')" class="filter-btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap">FIIs (Papel)</button>
+                </div>
+
+                <!-- Grid de Cards de Ativos -->
+                <div id="assets-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <!-- Gerado via JS -->
+                </div>
+            </section>
+
+            <!-- ABA CARTEIRA -->
+            <section id="aba-carteira" class="hidden space-y-6 max-w-7xl mx-auto">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">Gerenciador de Carteira</h2>
+                    <p class="text-slate-500 text-sm mt-1">Acompanhe seu patrimônio e dividendos.</p>
+                </div>
+
+                <!-- Cards de Resumo -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+                        <div class="absolute right-[-10px] top-[-10px] opacity-5"><i class="ph-fill ph-wallet text-9xl"></i></div>
+                        <p class="text-slate-500 text-sm font-semibold mb-2 uppercase tracking-wide">Patrimônio Total</p>
+                        <h3 id="wallet-total" class="text-3xl font-black text-slate-900 relative z-10">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-slate-500 text-sm font-semibold mb-2 uppercase tracking-wide">Lucro/Prejuízo</p>
+                        <h3 id="wallet-profit" class="text-3xl font-black text-slate-900">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-slate-500 text-sm font-semibold mb-2 uppercase tracking-wide">Previsão Dividendos (Mensal)</p>
+                        <h3 id="wallet-upcoming-divs" class="text-3xl font-black text-indigo-600">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-slate-900 p-6 rounded-2xl shadow-lg text-white">
+                        <p class="text-slate-400 text-sm font-semibold mb-2 uppercase tracking-wide">Meta Independência</p>
+                        <div class="mt-2 h-3 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="goal-progress-bar" class="h-full bg-emerald-400 w-0 rounded-full transition-all duration-500"></div>
+                        </div>
+                        <p id="goal-progress-text" class="text-xs text-slate-400 mt-2 text-right">0% alcançado</p>
+                    </div>
+                </div>
+
+                <!-- Tabela e Gráfico -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h3 class="font-bold text-slate-900">Ativos na Carteira</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                                        <th class="p-4 font-bold">Ativo</th>
+                                        <th class="p-4 font-bold text-right">Qtd</th>
+                                        <th class="p-4 font-bold text-right">Preço Médio</th>
+                                        <th class="p-4 font-bold text-right">Cotação Atual</th>
+                                        <th class="p-4 font-bold text-center">Próx. Pagamento</th>
+                                        <th class="p-4 font-bold text-center">Excluir</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wallet-table-body" class="divide-y divide-slate-100 text-sm">
+                                    <!-- Injetado via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 flex flex-col">
+                        <h3 class="font-bold text-slate-900 mb-6">Diversificação</h3>
+                        <div class="flex-1 relative min-h-[250px] w-full flex items-center justify-center">
+                            <canvas id="allocationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABA API (AwesomeAPI) -->
+            <section id="aba-api" class="hidden space-y-6 max-w-7xl mx-auto">
+                <div class="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-3xl p-8 md:p-10 text-white shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-10 -top-20 opacity-10">
+                        <i class="ph-fill ph-globe-hemisphere-east text-[350px]"></i>
+                    </div>
+                    <div class="relative z-10 max-w-3xl">
+                        <span class="bg-indigo-500/30 text-indigo-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm mb-4 inline-block">Consumo de API Real (Fetch)</span>
+                        <h2 class="text-3xl md:text-5xl font-black mb-4 leading-tight">Câmbio e Cripto em Tempo Real</h2>
+                        <p class="text-indigo-200 text-lg mb-8 max-w-2xl">
+                            Esta página atende aos requisitos do trabalho. Os dados abaixo são extraídos diretamente da internet através da <strong>AwesomeAPI</strong>, garantindo cotações 100% atualizadas utilizando requisições assíncronas.
+                        </p>
+                        
+                        <button id="btn-fetch-api" onclick="fetchGlobalRates()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-8 py-4 rounded-xl font-black transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] flex items-center gap-3">
+                            <i class="ph-bold ph-arrows-clockwise text-xl"></i> Atualizar Dados Agora
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tratamento de Erro -->
+                <div id="api-error" class="hidden bg-red-50 border border-red-200 p-6 rounded-2xl shadow-sm">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="ph-fill ph-warning-circle text-red-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-red-900 font-bold text-lg mb-1">Falha na Conexão com a API</h3>
+                            <p class="text-red-700 text-sm mb-3">Não foi possível buscar os dados da AwesomeAPI. Isso pode ocorrer por falta de conexão com a internet ou bloqueio da rede.</p>
+                            <button onclick="fetchGlobalRates()" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-700 transition-colors">Tentar Novamente</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid com Resultados da API -->
+                <div id="api-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 hidden">
+                    <!-- Cards de Câmbio inseridos via JS -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal Detalhes do Ativo -->
+    <div id="asset-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity" onclick="closeModal()"></div>
+        
+        <div class="absolute inset-x-0 bottom-0 md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-4xl bg-white md:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col max-h-[95vh] md:max-h-[85vh] overflow-hidden">
+            
+            <div class="p-6 md:p-8 border-b border-slate-100 bg-white flex justify-between items-center sticky top-0 z-20">
+                <div class="flex items-center gap-5">
+                    <div id="modal-icon" class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl text-white font-black shadow-lg"></div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-1">
+                            <h2 id="modal-ticker" class="text-3xl font-black text-slate-900 tracking-tight">TICKER</h2>
+                            <span id="modal-type-badge" class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">TIPO</span>
+                        </div>
+                        <p id="modal-name" class="text-slate-500 font-medium">Nome do Ativo</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="openBuyForm()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+                        <i class="ph-bold ph-plus"></i> Comprar
+                    </button>
+                    <button onclick="closeModal()" class="w-12 h-12 flex items-center justify-center bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 rounded-xl transition-colors">
+                        <i class="ph-bold ph-x text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulário de Compra -->
+            <div id="buy-form" class="hidden bg-indigo-50/50 p-6 md:px-8 border-b border-indigo-100/50">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="ph-fill ph-shopping-cart text-indigo-600 text-xl"></i>
+                    <h4 class="font-bold text-indigo-900">Registrar Compra na Carteira</h4>
+                </div>
+                <div class="flex flex-wrap gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-indigo-800 mb-1.5 uppercase tracking-wide">Quantidade</label>
+                        <input type="number" id="buy-qtd" class="w-32 px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 bg-white outline-none font-semibold text-slate-900" placeholder="Ex: 10">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-indigo-800 mb-1.5 uppercase tracking-wide">Preço (R$)</label>
+                        <input type="number" id="buy-price" step="0.01" class="w-32 px-4 py-3 rounded-xl border border-indigo-200 focus:ring-2 focus:ring-indigo-500 bg-white outline-none font-semibold text-slate-900">
+                    </div>
+                    <button onclick="confirmBuy()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-colors">Salvar Transação</button>
+                    <button onclick="closeBuyForm()" class="text-slate-500 px-4 py-3 font-semibold hover:text-slate-800 transition-colors">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Corpo dos Detalhes -->
+            <div class="p-6 md:p-8 overflow-y-auto flex-1 bg-slate-50/30">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Cotação Atual</p>
+                        <p id="modal-price" class="text-2xl font-black text-slate-900">R$ 0,00</p>
+                        <div class="mt-2 text-sm font-bold text-emerald-600 flex items-center gap-1"><i class="ph-bold ph-trend-up"></i> +1.24% hoje</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Dividend Yield (12M)</p>
+                        <p id="modal-dy" class="text-2xl font-black text-slate-900">0,00%</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Último Pagamento</p>
+                        <p id="modal-last-div" class="text-2xl font-black text-slate-900">R$ 0,00</p>
+                        <p class="text-xs text-slate-400 mt-1 font-medium">Por cota</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">P/VP (Valor)</p>
+                        <p id="modal-pvp" class="text-2xl font-black text-slate-900">1.00</p>
+                        <p id="modal-pvp-status" class="text-xs mt-1 font-bold">Justo</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 mb-8 shadow-sm">
+                    <h3 class="font-bold text-slate-900 mb-6 flex items-center gap-2"><i class="ph-bold ph-chart-line-up text-indigo-600 text-xl"></i> Rentabilidade Histórica</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center divide-x divide-slate-100">
+                        <div><p class="text-slate-500 text-xs font-bold uppercase mb-1">1 Mês</p><p class="font-black text-emerald-600">+2.4%</p></div>
+                        <div><p class="text-slate-500 text-xs font-bold uppercase mb-1">3 Meses</p><p class="font-black text-emerald-600">+5.1%</p></div>
+                        <div><p class="text-slate-500 text-xs font-bold uppercase mb-1">1 Ano</p><p class="font-black text-emerald-600" id="rent-1y">+23.8%</p></div>
+                        <div><p class="text-slate-500 text-xs font-bold uppercase mb-1">2 Anos</p><p class="font-black text-emerald-600">+34.5%</p></div>
+                        <div class="hidden md:block"><p class="text-slate-500 text-xs font-bold uppercase mb-1">5 Anos</p><p class="font-black text-emerald-600">+77.3%</p></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-6 relative overflow-hidden">
+                        <i class="ph-fill ph-snowflake absolute right-4 bottom-4 text-6xl text-indigo-200/50"></i>
+                        <h3 class="font-bold text-indigo-900 mb-2 relative z-10">Calculadora Bola de Neve</h3>
+                        <p class="text-sm text-indigo-700/80 mb-4 font-medium relative z-10">Quantas cotas você precisa ter para que os dividendos comprem 1 nova cota todos os meses?</p>
+                        <div class="flex items-baseline gap-2 relative z-10">
+                            <span id="modal-snowball" class="text-4xl font-black text-indigo-700">0</span>
+                            <span class="text-indigo-600 font-bold uppercase text-sm tracking-wider">cotas necessárias</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+                        <h3 class="font-bold text-slate-900 mb-2">Simulação de Retorno</h3>
+                        <p class="text-sm text-slate-500 font-medium mb-4">Se você tivesse investido R$ 1.000,00 neste ativo há exato 1 ano:</p>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex justify-between items-center">
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Você teria hoje</p>
+                                <p id="modal-sim-value" class="text-2xl font-black text-emerald-600">R$ 1.000,00</p>
+                            </div>
+                            <i class="ph-fill ph-money text-4xl text-emerald-100"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script principal -->
+    <script src="script.js"></script>
+</body>
+</html>
